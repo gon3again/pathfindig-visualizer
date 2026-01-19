@@ -5,29 +5,31 @@ from squareshape import SquareState
 clock = pygame.time.Clock()
 dt = 0
 
+
 is_drawing = False
-
-
+is_erasing = False
+last_hover = (0, 0)
 
 def main():
-    global is_drawing
+    
     global grid
     grid = create_grid()
-    grid[1][1] = "black"
-    print(grid)
+    
+    #print(grid)
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    #GAME LOOP_________________________________________________________________________________________________________
     while True:
-        for event in pygame.event.get():
-            #print(event)
-            if event.type == pygame.QUIT:
-                return
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                is_drawing = True
-            elif event.type == pygame.MOUSEBUTTONUP:
-                is_drawing = False
+        exit = check_input_events()
+        if exit:
+            return
+        
+        cur_mouse_pos = get_mouse_to_grid_pos()
+        check_hover_square(cur_mouse_pos)
 
         if is_drawing:
-            create_wall(get_mouse_to_grid_pos())
+            create_wall(cur_mouse_pos)
+        elif is_erasing:
+            erase_square(cur_mouse_pos)
         
 
         screen.fill("black")
@@ -36,8 +38,17 @@ def main():
             for i in range(GRID_SIZE):
                 cur_color = "white"
                 my_rect = pygame.Rect(LINE_SIZE+(RECT_SIZE+LINE_SIZE)*i,LINE_SIZE+(RECT_SIZE+LINE_SIZE)*j,RECT_SIZE,RECT_SIZE)
-                if grid[i][j] == SquareState.WALL:
-                    cur_color = "black"
+                cur_state = grid[i][j]
+                match cur_state:
+                    case SquareState.WALL:
+                        cur_color = "black"
+                    case SquareState.CUR_HOVER:
+                        cur_color = HOVER_COLOR
+                    case SquareState.START:
+                        cur_color = START_COLOR
+                    case SquareState.END:
+                        cur_color = END_COLOR
+
                 pygame.draw.rect(screen,cur_color,my_rect)
         pygame.display.flip()
         
@@ -47,26 +58,69 @@ def main():
         
 
 
-    print(f"_____________{pygame.version.ver}")
 
 
 
+
+
+def check_input_events():
+    global is_drawing
+    global is_erasing
+    for event in pygame.event.get(): 
+        if event.type == pygame.QUIT:
+            return True
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            is_drawing = True
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            is_drawing = False
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+            is_erasing = True
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
+            is_erasing = False
+
+
+def check_hover_square(pos):
+    global last_hover
+    last_state = grid[last_hover[0]][last_hover[1]]
+    cur_state = grid[pos[0]][pos[1]]
+    #print(pos[0],pos[1])
+    if cur_state == SquareState.NOTHING:
+        grid[pos[0]][pos[1]] = SquareState.CUR_HOVER
+    if pos != last_hover and last_state == SquareState.CUR_HOVER:
+        grid[last_hover[0]][last_hover[1]] = SquareState.NOTHING
+    last_hover = pos
+
+
+
+def create_start(pos):
+    global grid
+    grid[pos[0]][pos[1]] = SquareState.START
+
+def erase_square(pos):
+    global grid
+    cur_state = grid[pos[0]][pos[1]]
+    if cur_state == SquareState.WALL:
+        grid[pos[0]][pos[1]] = SquareState.NOTHING
 
 def create_wall(pos):
     global grid
-    grid[pos[0]][pos[1]] = SquareState.WALL
+    cur_state = grid[pos[0]][pos[1]]
+    if cur_state != SquareState.START and cur_state != SquareState.END:
+        grid[pos[0]][pos[1]] = SquareState.WALL
 
 def get_mouse_to_grid_pos():
     mouse_pos = pygame.mouse.get_pos()
     x = mouse_pos[0]
     y = mouse_pos[1]
-    print((x,y))   
-    grid_pos = (x//(LINE_SIZE+(RECT_SIZE+LINE_SIZE)), y//(LINE_SIZE+(RECT_SIZE+LINE_SIZE)))
+    #print((x,y))   
+    grid_pos = (min(x//(RECT_SIZE+LINE_SIZE),GRID_SIZE-1), min(y//(RECT_SIZE+LINE_SIZE),GRID_SIZE-1))
     return grid_pos
 
 
 def create_grid():
     arr = [[SquareState.NOTHING for i in range(GRID_SIZE)] for j in range(GRID_SIZE)]
+    arr[10][10] = SquareState.START
+    arr[GRID_SIZE-5][GRID_SIZE-5] = SquareState.END
     return arr
     
 if __name__ == "__main__":

@@ -25,3 +25,4 @@ class SquareState(Enum):
     WALL = 4
     SEARCHED = 5
     CUR_ACTIVE = 6
+    CUR_HOVER = 7
