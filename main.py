@@ -119,8 +119,8 @@ def get_mouse_to_grid_pos():
 
 def create_grid():
     arr = [[SquareState.NOTHING for i in range(GRID_SIZE)] for j in range(GRID_SIZE)]
-    arr[10][10] = SquareState.START
-    arr[GRID_SIZE-5][GRID_SIZE-5] = SquareState.END
+    arr[10][2] = SquareState.START
+    arr[GRID_SIZE-6][GRID_SIZE-5] = SquareState.END
     return arr
     
 if __name__ == "__main__":
