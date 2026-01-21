@@ -1,7 +1,7 @@
 import pygame
 from constants import *
-
 from node import Node
+from pathfinding_algorithm import Pathfinder
 
 
 clock = pygame.time.Clock()
@@ -15,9 +15,10 @@ last_hover = (0, 0)
 def main():
     
     global grid
-    grid = create_grid()
-    
-    #print(grid)
+    grid,start_node,end_node = create_grid()
+    node_setup()
+    global path_finder
+    path_finder = Pathfinder(grid, start_node, end_node)
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     #GAME LOOP_________________________________________________________________________________________________________
     while True:
@@ -51,6 +52,8 @@ def main():
                         cur_color = START_COLOR
                     case Node.State.END:
                         cur_color = END_COLOR
+                    case Node.State.VISITED:
+                        cur_color = "blue"
 
                 pygame.draw.rect(screen,cur_color,my_rect)
         pygame.display.flip()
@@ -80,6 +83,8 @@ def check_input_events():
             is_erasing = True
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
             is_erasing = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+            path_finder.find_path()
 
 
 def check_hover_square(pos):
@@ -115,20 +120,25 @@ def get_mouse_to_grid_pos():
     mouse_pos = pygame.mouse.get_pos()
     x = mouse_pos[0]
     y = mouse_pos[1]
-    #print((x,y))   
     grid_pos = (min(x//(RECT_SIZE+LINE_SIZE),GRID_SIZE-1), min(y//(RECT_SIZE+LINE_SIZE),GRID_SIZE-1))
     grid_pos = (max(grid_pos[0],0), max(grid_pos[1],0))
    
-    if grid_pos[0] < 0 or grid_pos[1] < 0:
-        print(grid_pos)
+   
     return grid_pos
 
 
-def create_grid():
+def create_grid(start_x=0,start_y=0,end_x=GRID_SIZE-1,end_y=GRID_SIZE-1):
     arr = [[Node(i,j,float('inf'),Node.State.NOTHING) for i in range(GRID_SIZE)] for j in range(GRID_SIZE)]
-    arr[10][2].set_state(Node.State.START)
-    arr[GRID_SIZE-6][GRID_SIZE-5].set_state(Node.State.END)
-    return arr
+    arr[start_x][start_y].set_state(Node.State.START)
+    arr[end_x][end_y].set_state(Node.State.END)
+    # grid, start, end
+    return arr ,arr[start_x][start_y],arr[end_x][end_y]
+
+def node_setup():
+    for y in range(GRID_SIZE):
+        for x in range(GRID_SIZE):
+            grid[x][y].set_grid(grid)
+    
 
 
     
