@@ -16,18 +16,20 @@ class Pathfinder():
         unvisited_nodes:list[Node] = []
         for y in range(GRID_SIZE):
             for x in range(GRID_SIZE):
+
                 unvisited_nodes.append(self.grid[x][y])    
 
-        looping = True
-        visited_nodes = [self.start_node]
+        is_end = False
+        
 
         cur_node = self.start_node
         cur_path = cur_node.get_path()
         #Loop_______________________________________________________
-        while looping:
+        while not is_end:
             cur_neighbours = cur_node.get_neighbours()
             for neigh in cur_neighbours:
                 neigh.set_dist(cur_node.get_dist()+1,cur_path)#adding distance for neighbour
+                
 
             unvisited_nodes.remove(cur_node)
             #select lowest distance
@@ -38,20 +40,18 @@ class Pathfinder():
                     lowest_dist = node.get_dist()
                     lowest_dist_node = node
 
-            print(f"unvisited: {len(unvisited_nodes)}")
-            if lowest_dist_node != None:
-                
-                lowest_dist_node.visit()
-                
-                
-                cur_neighbours = lowest_dist_node.get_neighbours()
-                cur_node = lowest_dist_node
-            else:
-                looping = false
+            #print(f"unvisited: {len(unvisited_nodes)}")
             
+            is_end, result_path = lowest_dist_node.visit()
+            if is_end:
+                for y in range(GRID_SIZE):
+                    for x in range(GRID_SIZE):
+                        print(f"pos:{x,y} my_path:{self.grid[x][y].path}")
+                return result_path
+            cur_neighbours = lowest_dist_node.get_neighbours()
+            cur_node = lowest_dist_node
 
-        # print(f"low dis node: {lowest_dist_node.distance}")
-        # print(f"low dis node: {lowest_dist_node.get_pos()}")
+
 
 
 

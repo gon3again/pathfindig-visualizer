@@ -24,6 +24,7 @@ class Node():
         VISITED = 5
         CUR_ACTIVE = 6
         CUR_HOVER = 7
+        PATH = 8
 
     def get_state(self):
         return self.state
@@ -45,8 +46,11 @@ class Node():
         if dist < self.distance:
             self.distance = dist
             if self.state != Node.State.START:
-                self.path = path.append(self)
-                self.state = Node.State.VISITED
+                self.path = path.copy().append(self)
+                if self.state != Node.State.END:
+                    self.state = Node.State.VISITED
+                
+                
 
 
 
@@ -66,7 +70,7 @@ class Node():
                 neighbours.append(self.grid[x][y+1])
             if y-1 >= 0:
                 neighbours.append(self.grid[x][y-1])
-            print(f"my_pos: {(x,y)} neigbours:{len(neighbours)}")
+            #print(f"my_pos: {(x,y)} neigbours:{len(neighbours)}")
             return neighbours
         except Exception as e:
             print(f"ERROR: could not add neigbours: {e}| neigbours:{len(neighbours)}")
@@ -78,6 +82,8 @@ class Node():
 
     def visit(self):
         self.visited = True
+        return self.state == Node.State.END, self.path
+        
 
     def get_path(self):
         return self.path

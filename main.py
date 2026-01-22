@@ -54,6 +54,8 @@ def main():
                         cur_color = END_COLOR
                     case Node.State.VISITED:
                         cur_color = "blue"
+                    case Node.State.PATH:
+                        cur_color = "red"
 
                 pygame.draw.rect(screen,cur_color,my_rect)
         pygame.display.flip()
@@ -84,7 +86,13 @@ def check_input_events():
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
             is_erasing = False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-            path_finder.find_path()
+            result_path = path_finder.find_path()
+            print(result_path)
+            # result_path = path_finder.find_path()
+            # if result_path != None:
+            #     print(result_path)
+                # for node in result_path:
+                #     node.State = Node.State.PATH
 
 
 def check_hover_square(pos):
